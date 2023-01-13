@@ -1,11 +1,11 @@
 # autoleap.sh
 
-Access any previously visited directory typing `cd part_of_path`. Currently only works on `bash`. 
+Access any previously visited directory typing `cd part_of_path`. Currently only works on `bash`.
 
 
 ## Installation
 
-- Download the script `autojump.sh` anywhere.
+- Download the script `autoleap.sh` anywhere.
 - `source` the script on your `.bashrc` (add the line `source /path/to/script/autoleap.sh` to the end of your `.bashrc`)
 - Reopen the terminal (or source `.bashrc`)
 
