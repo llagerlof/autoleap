@@ -1,3 +1,12 @@
+# autoleap.sh
+#
+# Autoleap is a bash script that improves the `cd` command, allowing quick access to previously accessed directories.
+#
+# Version: 1.0.0
+# Author:  Lawrence Lagerlof <llagerlof@gmail.com>
+# GitHub:  http://github.com/llagerlof/autoleap
+# License: https://opensource.org/licenses/MIT
+
 cd () {
     # Reset local variables
     unset path_argument
