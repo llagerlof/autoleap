@@ -2,7 +2,7 @@
 #
 # Autoleap is a bash script that improves the `cd` command, allowing quick access to previously accessed directories.
 #
-# Version: 1.0.1
+# Version: 1.0.2
 # Author:  Lawrence Lagerlof <llagerlof@gmail.com>
 # GitHub:  http://github.com/llagerlof/autoleap
 # License: https://opensource.org/licenses/MIT
@@ -25,7 +25,10 @@ cd () {
         fi
     done
 
-    if [ -v path_argument ]; then
+    # If the first argument is two dashes just run default cd (directories starting with a dash you need to add -- after cd)
+    if [ "$1" = "--" ]; then
+        builtin cd "$@"
+    elif [ -v path_argument ]; then
         # If the path_argument is a directory that exists, access it
         if [ -d "$path_argument" ]; then
             builtin cd "$@"
