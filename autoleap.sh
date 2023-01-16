@@ -2,41 +2,37 @@
 #
 # Autoleap is a bash script that improves the `cd` command, allowing quick access to previously accessed directories.
 #
-# Version: 1.0.2
+# Version: 1.0.3
 # Author:  Lawrence Lagerlof <llagerlof@gmail.com>
 # GitHub:  http://github.com/llagerlof/autoleap
 # License: https://opensource.org/licenses/MIT
 
 cd () {
-    # Reset local variables
-    unset path_argument
-    unset line_found
+    # If the builtin cd fails, try to find the path argument in history file
+    if ! builtin cd "$@" >/dev/null 2>&1; then
 
-    # Initialize the history file
-    if [ ! -f ~/.autoleap.history ]
-    then
-        touch ~/.autoleap.history
-    fi
+        # Extract the directory path from the possible cd arguments
+        path_argument=""
+        for arg in "$@"; do
+            if [ $arg != "-" ] && [ $arg != "--" ] && [ $arg != "-L" ] && [ $arg != "-P" ]; then
+                path_argument=$arg
+            fi
+        done
 
-    # Extract the directory path from arguments
-    for arg in "$@"; do
-        if [ $arg != -* ]; then
-            path_argument=$arg
-        fi
-    done
+        # The actual search in history file only happens if a valid path argument was found
+        if [ "$path_argument" != "" ]; then
 
-    # If the first argument is two dashes just run default cd (directories starting with a dash you need to add -- after cd)
-    if [ "$1" = "--" ]; then
-        builtin cd "$@"
-    elif [ -v path_argument ]; then
-        # If the path_argument is a directory that exists, access it
-        if [ -d "$path_argument" ]; then
-            builtin cd "$@"
-        # If path_argument is not a directory that exists, search a valid path in history file
-        else
+            # Initialize the history file
+            if [ ! -f ~/.autoleap.history ]
+            then
+                touch ~/.autoleap.history
+            fi
+
+            # Store two possible history entries.
             line_end_found=`tac ~/.autoleap.history | grep "$path_argument$" | head -n1`
             line_found=`tac ~/.autoleap.history | grep "$path_argument" | head -n1`
 
+            # Gives preference to path_argument at the end of line in history (leap to most inner directory, if available)
             if test -d "$line_end_found"; then
                 destination=$line_end_found
             elif test -d "$line_found"; then
@@ -47,9 +43,6 @@ cd () {
 
             builtin cd "$destination"
         fi
-    else
-        # If no arguments (or only options) was passed to cd, just run cd with the options (just in case the options -L or -P is set)
-        builtin cd "$@"
     fi
 
     # Add current path to history only if does not exist in history file
@@ -57,4 +50,11 @@ cd () {
     if [ "$pwd_history" = "" ]; then
         echo $PWD >> ~/.autoleap.history
     fi
+
+    # Reset local variables
+    unset path_argument
+    unset line_end_found
+    unset line_found
+    unset destination
+    unset pwd_history
 }
