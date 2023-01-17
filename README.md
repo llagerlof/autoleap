@@ -1,4 +1,4 @@
-# autoleap.sh
+# Autoleap
 
 Access any previously visited directory typing `cd part_of_path`
 
