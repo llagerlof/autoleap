@@ -5,7 +5,7 @@ Access any previously visited directory typing `cd part_of_path`
 
 ## How to use it
 
-After using some times the `cd` command, you will have a set of "bookmarks" that you can access easily. For example:
+After using the `cd` command several times, you will have a set of directories that you can easily access like bookmarks. For example:
 
 You accessed the `/home/user/Downloads/` once. Next time you want to visit the `/Downloads` directory you can just type `cd Downloads` anywhere, or even `cd Dow`, for instance.
 
@@ -16,10 +16,9 @@ You accessed the `/home/user/Downloads/` once. Next time you want to visit the `
 
 When you access any directory using the `cd` command, the full path is stored into the `~/.autoleap.history` file.
 
-When you type any string after the cd command you will access the directory you choose, but if the directory path does not exist, it searchs the history file for that string and access the path, if found in history file.
+When you type any string after the `cd` command, the script will try to change to the directory you've specified. If the directory does not exist, the script will search the history file for that string and change to the path if it is found in the history file.
 
-All of this is possible because the script declares a `cd` function that uses the built-in `cd` command, but implements new functionalities.
-
+All of this is possible because the script declares a `cd` function that enhances the built-in `cd` command by adding new functionalities.
 
 
 ## Installation

@@ -2,7 +2,7 @@
 #
 # Autoleap is a bash script that improves the `cd` command, allowing quick access to previously accessed directories.
 #
-# Version: 1.0.3
+# Version: 1.0.4
 # Author:  Lawrence Lagerlof <llagerlof@gmail.com>
 # GitHub:  http://github.com/llagerlof/autoleap
 # License: https://opensource.org/licenses/MIT
@@ -28,17 +28,41 @@ cd () {
                 touch ~/.autoleap.history
             fi
 
-            # Store two possible history entries.
-            line_end_found=`tac ~/.autoleap.history | grep "$path_argument$" | head -n1`
-            line_found=`tac ~/.autoleap.history | grep "$path_argument" | head -n1`
+            # Search for the directory in history file
+            path_dirname_found=`tac ~/.autoleap.history | grep "\/$path_argument$" | head -n1`
+            path_end_found=`tac ~/.autoleap.history | grep "$path_argument$" | head -n1`
+            path_any_found=`tac ~/.autoleap.history | grep "$path_argument" | head -n1`
 
-            # Gives preference to path_argument at the end of line in history (leap to most inner directory, if available)
-            if test -d "$line_end_found"; then
-                destination=$line_end_found
-            elif test -d "$line_found"; then
-                destination=$line_found
+            # Set the best path found
+            if [ "$path_dirname_found" != "" ]; then
+                path_found=$path_dirname_found
+            elif [ "$path_end_found" != "" ]; then
+                path_found=$path_end_found
             else
-                destination=$path_argument
+                path_found=$path_any_found
+            fi
+
+            # Create an array containing all directories names in path_found for easier parsing
+            IFS='/' read -ra path_found_parts <<< "$path_found"
+            dir_count=${#path_found_parts[@]}
+
+            # Search for a best match in all directory names of the path
+            for i in $(seq $dir_count -1 0)
+            do
+                if [[ ${path_found_parts[i]} == "$path_argument" ]]; then
+                    index_found=$i
+                    break
+                elif [[ ${path_found_parts[i]} == *"$path_argument"* ]]; then
+                    index_found=$i
+                    break
+                fi
+            done
+
+            # Remove from array the directories after the best matched directory. This is our destination.
+            best_match=( "${path_found_parts[@]:0:$index_found + 1}" )
+            destination=$(IFS='/'; echo "${best_match[*]}")
+            if [ "$destination" = "" ]; then
+                destination=$path_found
             fi
 
             builtin cd "$destination"
@@ -53,8 +77,13 @@ cd () {
 
     # Reset local variables
     unset path_argument
-    unset line_end_found
-    unset line_found
+    unset path_found
+    unset path_dirname_found
+    unset path_end_found
+    unset path_any_found
     unset destination
     unset pwd_history
+    unset dir_count
+    unset index_found
+    unset best_match
 }
