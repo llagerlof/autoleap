@@ -23,7 +23,7 @@ All of this is possible because the script declares a `cd` function that enhance
 
 ## Installation
 
-- Be sure you use the bash shell, since this script was wrote for it.
+- Be sure you use the bash shell, since this script was written for it.
 - Download the script `autoleap.sh` anywhere.
 - `source` the script on your `.bashrc` (add the line `source /path/to/script/autoleap.sh` to the end of your `.bashrc`)
 - Reopen the terminal (or source `.bashrc`)
