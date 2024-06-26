@@ -1,6 +1,6 @@
 # Autoleap
 
-Access any previously visited directory typing `cd part_of_path`
+Access any previously visited directory typing `cd <part_of_path>`
 
 
 ## How to use it
@@ -18,14 +18,14 @@ When you access any directory using the `cd` command, the full path is stored in
 
 When you type any string after the `cd` command, the script will try to change to the directory you've specified. If the directory does not exist, the script will search the history file for that string and change to the path if it is found in the history file.
 
-All of this is possible because the script declares a `cd` function that enhances the built-in `cd` command by adding new functionalities.
+All of this is possible because the script declares a `cd` function that wraps the built-in `cd` command.
 
 
 ## Installation
 
 - Be sure you use the bash shell, since this script was written for it.
-- Download the script `autoleap.sh` anywhere.
-- `source` the script on your `.bashrc` (add the line `source /path/to/script/autoleap.sh` to the end of your `.bashrc`)
+- Download the script `autoleap.sh` anywhere, for example, to `/usr/local/bin/`.
+- `source` the script on your `.bashrc` (add the line `source /usr/local/bin/autoleap.sh` to the end of your `.bashrc`)
 - Reopen the terminal (or source `.bashrc`)
 
 

@@ -2,7 +2,7 @@
 #
 # Autoleap is a bash script that improves the `cd` command, allowing quick access to previously accessed directories.
 #
-# Version: 1.0.6
+# Version: 1.0.7
 # Author:  Lawrence Lagerlof <llagerlof@gmail.com>
 # GitHub:  http://github.com/llagerlof/autoleap
 # License: https://opensource.org/licenses/MIT
@@ -23,8 +23,7 @@ cd () {
         if [ "$path_argument" != "" ]; then
 
             # Initialize the history file
-            if [ ! -f ~/.autoleap.history ]
-            then
+            if [ ! -f ~/.autoleap.history ]; then
                 touch ~/.autoleap.history
             fi
 
@@ -48,8 +47,7 @@ cd () {
             dir_count=${#path_found_parts[@]}
 
             # Search for a best match in all directory names of the path
-            for i in $(seq $dir_count -1 0)
-            do
+            for i in $(seq $dir_count -1 0); do
                 if [[ ${path_found_parts[i]} == "$path_argument" ]]; then
                     index_found=$i
                     break
@@ -66,7 +64,14 @@ cd () {
                 destination=$path_found
             fi
 
-            builtin cd "$destination"
+            if [ -n "$destination" ] && [ ! -d "$destination" ]; then
+                sed -i "\:^$destination$:d" ~/.autoleap.history
+                echo "Directory \"$destination\" does not exist. Path removed from ~/.autoleap.history"
+            elif [ -n "$destination" ]; then
+                builtin cd "$destination"
+            else
+                builtin cd "$path_argument"
+            fi
         fi
     fi
 
