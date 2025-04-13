@@ -1,87 +1,99 @@
 # autoleap.sh
 #
-# Autoleap is a bash script that improves the `cd` command, allowing quick access to previously accessed directories.
+# Enhances `cd` with directory history tracking and intelligent path matching
 #
-# Version: 1.0.11
+# Version: 1.1.0
 # Author:  Lawrence Lagerlof <llagerlof@gmail.com>
 # GitHub:  http://github.com/llagerlof/autoleap
-# License: https://opensource.org/licenses/MIT
+# License: MIT
 
 cd () {
+    local options=()
+    local path_argument=""
+    local found_double_dash=false
+    local exit_status=0
+    local history_contents path_dirname_found path_end_found path_any_found
+    local path_found destination IFS_backup
 
-    local path_argument path_found path_dirname_found path_end_found path_any_found destination pwd_history dir_count index_found best_match history_contents
-
-    # Initialize the history file
-    if [ ! -f ~/.autoleap.history ]; then
-        touch ~/.autoleap.history
-    fi
-
-    # Extract the directory path from the arguments
-    path_argument=""
+    # Parse arguments
     for arg in "$@"; do
-        if [ $arg != "-" ] && [ $arg != "--" ] && [ $arg != "-L" ] && [ $arg != "-P" ]; then
-            path_argument=$arg
+        if $found_double_dash; then
+            path_argument="$arg"
+            break
+        elif [[ "$arg" == "--" ]]; then
+            options+=("$arg")
+            found_double_dash=true
+        elif [[ "$arg" == -* ]]; then
+            options+=("$arg")
+        else
+            path_argument="$arg"
         fi
     done
 
-    # If directory exists attempts to access it (or just run `cd` to go to home directory)
+    # Initialize history file
+    touch ~/.autoleap.history 2>/dev/null || { echo "Cannot create history file"; return 1; }
+
+    # Try normal cd first
     if [ -d "$path_argument" ] || [ -z "$path_argument" ]; then
-        builtin cd "$@"
+        builtin cd "${options[@]}" "$path_argument"
+        exit_status=$?
     else
-        # The actual search in history file only happens if a valid path argument was found
-        if [ "$path_argument" != "" ]; then
+        # Search history for best match
+        history_contents=()
+        while IFS= read -r line; do
+            history_contents=("$line" "${history_contents[@]}")
+        done < ~/.autoleap.history
 
-            # Search for the directory in history file
-            history_contents=`tac ~/.autoleap.history`
-            path_dirname_found=`echo "$history_contents" | grep "/$path_argument$" | head -n1`
-            path_end_found=`echo "$history_contents" | grep "$path_argument$" | head -n1`
-            path_any_found=`echo "$history_contents" | grep "$path_argument" | head -n1`
+        path_found=$({
+            printf '%s\n' "${history_contents[@]}" | grep -F "/$path_argument$" | head -n1
+            printf '%s\n' "${history_contents[@]}" | grep -F "$path_argument$" | head -n1
+            printf '%s\n' "${history_contents[@]}" | grep -F "$path_argument" | head -n1
+        } | head -n1)
 
-            # Set the best path found
-            if [ "$path_dirname_found" != "" ]; then
-                path_found=$path_dirname_found
-            elif [ "$path_end_found" != "" ]; then
-                path_found=$path_end_found
-            else
-                path_found=$path_any_found
-            fi
-
-            # Create an array containing all directories names in path_found for easier parsing
-            IFS='/' read -ra path_found_parts <<< "$path_found"
-            dir_count=${#path_found_parts[@]}
-
-            # Search for a best match in all directory names of the path
-            for i in $(seq $dir_count -1 0); do
-                if [[ ${path_found_parts[i]} == "$path_argument" ]]; then
-                    index_found=$i
-                    break
-                elif [[ ${path_found_parts[i]} == *"$path_argument"* ]]; then
-                    index_found=$i
+        if [ -n "$path_found" ]; then
+            IFS_backup=$IFS
+            IFS='/'
+            local path_parts=($path_found)
+            IFS=$IFS_backup
+            
+            local best_index=-1
+            for ((i=${#path_parts[@]}-1; i>=0; i--)); do
+                if [[ "${path_parts[i]}" == *"$path_argument"* ]]; then
+                    best_index=$i
                     break
                 fi
             done
-
-            # Remove from array the directories after the best matched directory. This is our destination.
-            best_match=( "${path_found_parts[@]:0:$index_found + 1}" )
-            destination=$(IFS='/'; echo "${best_match[*]}")
-            if [ "$destination" == "" ]; then
-                destination=$path_found
-            fi
-
-            if [ -n "$destination" ] && [ ! -d "$destination" ]; then
-                sed -i "\:^$destination$:d" ~/.autoleap.history
-                echo "Directory \"$destination\" does not exist. Path removed from ~/.autoleap.history"
-            elif [ -n "$destination" ]; then
-                builtin cd "$destination"
+            
+            if [ $best_index -ge 0 ]; then
+                destination=$(IFS='/'; printf '/%s' "${path_parts[@]:0:$((best_index+1))}")
+                destination=${destination:1}  # Remove leading slash
             else
-                builtin cd "$path_argument"
+                destination="$path_found"
             fi
+
+            # Validate and cd
+            if [ ! -d "$destination" ]; then
+                sed "\:^${destination//:/\\:}$:d" ~/.autoleap.history > ~/.autoleap.history.tmp &&
+                mv ~/.autoleap.history.tmp ~/.autoleap.history
+                echo "Removed invalid path: $destination"
+                exit_status=1
+            else
+                builtin cd "${options[@]}" "$destination"
+                exit_status=$?
+            fi
+        else
+            builtin cd "${options[@]}" "$path_argument" 2>/dev/null
+            exit_status=$?
+            [ $exit_status -ne 0 ] && echo "cd: $path_argument: No such file or directory"
         fi
     fi
 
-    # Add current path to history only if does not exist in history file
-    pwd_history=`grep -x "$PWD" ~/.autoleap.history | head -n1`
-    if [ "$pwd_history" == "" ]; then
-        echo $PWD >> ~/.autoleap.history
+    # Update history after successful cd
+    if [ $exit_status -eq 0 ]; then
+        if ! grep -qxF "$PWD" ~/.autoleap.history; then
+            echo "$PWD" >> ~/.autoleap.history
+        fi
     fi
+
+    return $exit_status
 }
