@@ -18,6 +18,8 @@ When you access any directory using the `cd` command, the full path is stored in
 
 When you type any string after the `cd` command, the script will try to change to the directory you've specified. If the directory does not exist, the script will search the history file for that string and change to the path if it is found in the history file.
 
+If there are multiple exact matches for your search pattern, Autoleap will use `fzf` (if available) to display an interactive selection menu that allows you to choose which directory to navigate to.
+
 All of this is possible because the script declares a `cd` function that wraps the built-in `cd` command.
 
 
@@ -27,6 +29,7 @@ All of this is possible because the script declares a `cd` function that wraps t
 - Download the script `autoleap.sh` anywhere, for example, to `/usr/local/bin/`.
 - `source` the script on your `.bashrc` (add the line `source /usr/local/bin/autoleap.sh` to the end of your `.bashrc`)
 - Reopen the terminal (or source `.bashrc`)
+- For interactive directory selection, install `fzf` by following the instructions at https://github.com/junegunn/fzf/
 
 
 ## Acknowledgment
