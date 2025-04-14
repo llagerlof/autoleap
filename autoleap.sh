@@ -2,7 +2,7 @@
 #
 # Enhances `cd` with directory history tracking and intelligent path matching
 #
-# Version: 2.0.0
+# Version: 2.0.1
 # Author:  Lawrence Lagerlof <llagerlof@gmail.com>
 # GitHub:  http://github.com/llagerlof/autoleap
 # License: MIT
@@ -36,7 +36,12 @@ cd () {
 
     # Try normal cd first
     if [ -d "$path_argument" ] || [ -z "$path_argument" ]; then
-        builtin cd "${options[@]}" "$path_argument"
+        if [ -z "$path_argument" ]; then
+            # When no argument is provided, go to home directory
+            builtin cd "${options[@]}"
+        else
+            builtin cd "${options[@]}" "$path_argument"
+        fi
         exit_status=$?
     else
         # Check if fzf is available
@@ -104,9 +109,10 @@ cd () {
 
                         # Validate and cd
                         if [ ! -d "$destination" ]; then
-                            sed "\:^${destination//:/\\:}$:d" ~/.autoleap.history > ~/.autoleap.history.tmp &&
+                            # Remove the original path_found from history, not the derived destination
+                            sed "\:^${path_found//:/\\:}$:d" ~/.autoleap.history > ~/.autoleap.history.tmp &&
                             mv ~/.autoleap.history.tmp ~/.autoleap.history
-                            echo "Removed invalid path: $destination"
+                            echo "Removed invalid path: $path_found"
                             exit_status=1
                         else
                             builtin cd "${options[@]}" "$destination"
@@ -149,9 +155,10 @@ cd () {
 
                     # Validate and cd
                     if [ ! -d "$destination" ]; then
-                        sed "\:^${destination//:/\\:}$:d" ~/.autoleap.history > ~/.autoleap.history.tmp &&
+                        # Remove the original path_found from history, not the derived destination
+                        sed "\:^${path_found//:/\\:}$:d" ~/.autoleap.history > ~/.autoleap.history.tmp &&
                         mv ~/.autoleap.history.tmp ~/.autoleap.history
-                        echo "Removed invalid path: $destination"
+                        echo "Removed invalid path: $path_found"
                         exit_status=1
                     else
                         builtin cd "${options[@]}" "$destination"
@@ -199,9 +206,10 @@ cd () {
 
                 # Validate and cd
                 if [ ! -d "$destination" ]; then
-                    sed "\:^${destination//:/\\:}$:d" ~/.autoleap.history > ~/.autoleap.history.tmp &&
+                    # Remove the original path_found from history, not the derived destination
+                    sed "\:^${path_found//:/\\:}$:d" ~/.autoleap.history > ~/.autoleap.history.tmp &&
                     mv ~/.autoleap.history.tmp ~/.autoleap.history
-                    echo "Removed invalid path: $destination"
+                    echo "Removed invalid path: $path_found"
                     exit_status=1
                 else
                     builtin cd "${options[@]}" "$destination"
