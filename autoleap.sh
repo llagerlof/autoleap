@@ -59,11 +59,14 @@ cd () {
             # Find directories whose final component exactly matches path_argument
             mapfile -t basename_matches < <(printf '%s\n' "${history_contents[@]}" | grep "/[^/]*$path_argument$")
 
+            # Find directories that contain the path_argument anywhere
+            mapfile -t substring_matches < <(printf '%s\n' "${history_contents[@]}" | grep -F "$path_argument")
+
             # If we have multiple matches, use fzf to select
-            if [ ${#dir_matches[@]} -gt 1 ] || [ ${#basename_matches[@]} -gt 1 ]; then
+            if [ ${#dir_matches[@]} -gt 1 ] || [ ${#basename_matches[@]} -gt 1 ] || [ ${#substring_matches[@]} -gt 1 ]; then
                 # Combine all matches without duplicates
                 all_matches=()
-                for match in "${dir_matches[@]}" "${basename_matches[@]}"; do
+                for match in "${dir_matches[@]}" "${basename_matches[@]}" "${substring_matches[@]}"; do
                     if [ -d "$match" ] && ! printf '%s\n' "${all_matches[@]}" | grep -qx "$match"; then
                         all_matches+=("$match")
                     fi
