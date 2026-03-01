@@ -14,13 +14,13 @@ You accessed the `/home/user/Downloads/` once. Next time you want to visit the `
 
 ## How it works
 
-When you access any directory using the `cd` command, the full path is stored into the `~/.autoleap.history` file.
+The script declares a `cd` function that wraps the built-in `cd` command. Every time you change directories, the full path is stored into the `~/.autoleap.history` file.
 
-When you type any string after the `cd` command, the script will try to change to the directory you've specified. If the directory does not exist, the script will search the history file for that string and change to the path if it is found in the history file.
+The built-in `cd` is **always tried first**, so all standard behavior is fully preserved — including `CDPATH`, `cd -`, `cd old new` substitution, and options like `-P`/`-L`. Autoleap only kicks in as a fallback when the built-in `cd` cannot resolve the path on its own.
 
-If there are multiple matches for your search pattern, Autoleap will use `fzf` (if available) to display an interactive selection menu that allows you to choose which directory to navigate to. In this list, exact final-directory-name matches are prioritized over broader substring-only matches, and the displayed order preserves this ranking.
+When the fallback activates, Autoleap searches the history file for your input and changes to the best matching path. If there are multiple matches, Autoleap will use `fzf` (if available) to display an interactive selection menu. In this list, exact final-directory-name matches are prioritized over broader substring-only matches, and the displayed order preserves this ranking.
 
-All of this is possible because the script declares a `cd` function that wraps the built-in `cd` command.
+Paths that no longer exist on disk are automatically removed from the history file when encountered.
 
 
 ## Installation
