@@ -2,7 +2,7 @@
 #
 # Enhances `cd` with directory history tracking and intelligent path matching
 #
-# Version: 2.0.1
+# Version: 2.1.0
 # Author:  Lawrence Lagerlof <llagerlof@gmail.com>
 # GitHub:  http://github.com/llagerlof/autoleap
 # License: MIT
@@ -73,7 +73,20 @@ cd () {
                 done
 
                 if [ ${#all_matches[@]} -gt 1 ]; then
-                    destination=$(printf '%s\n' "${all_matches[@]}" | fzf --height 20% --prompt="Select directory: ")
+                    # Sort by match quality (best first, since fzf shows first item at bottom):
+                    #   2 = basename exactly equals query  (best — appears at bottom/cursor)
+                    #   1 = basename contains query
+                    #   0 = no basename match               (worst — appears at top)
+                    # Within each group, shallower paths first (deeper paths toward the top).
+                    mapfile -t all_matches < <(
+                        printf '%s\n' "${all_matches[@]}" | awk -v q="$path_argument" '{
+                            n = split($0, parts, "/")
+                            score = (parts[n] == q) ? 2 : ((index(parts[n], q) > 0) ? 1 : 0)
+                            printf "%d\t%d\t%s\n", score, n, $0
+                        }' | sort -t'	' -k1,1rn -k2,2n | cut -f3-
+                    )
+
+                    destination=$(printf '%s\n' "${all_matches[@]}" | fzf --no-sort --height 20% --prompt="Select directory: ")
                     if [ -n "$destination" ]; then
                         builtin cd "${options[@]}" "$destination"
                         exit_status=$?
