@@ -25,11 +25,57 @@ Paths that no longer exist on disk are automatically removed from the history fi
 
 ## Installation
 
-- Be sure you use the bash shell, since this script was written for it.
-- Download the script `autoleap.sh` anywhere, for example, to `/usr/local/bin/`.
-- `source` the script on your `.bashrc` (add the line `source /usr/local/bin/autoleap.sh` to the end of your `.bashrc`)
-- Reopen the terminal (or source `.bashrc`)
+- Be sure you use the Bash shell, since this script was written for it.
+- Autoleap works by being **sourced** from your `~/.bashrc`; simply placing it on `PATH` is not enough.
+- Reopen the terminal after installing, or run `source ~/.bashrc`.
 - For interactive directory selection, install `fzf` by following the instructions at https://github.com/junegunn/fzf/
+
+### Install only for the current user
+
+#### Option 1: Clone the repository and symlink the script into `~/.local/bin`
+
+```bash
+mkdir -p ~/repos ~/.local/bin
+git clone https://github.com/llagerlof/autoleap.git ~/repos/autoleap
+chmod +x ~/repos/autoleap/autoleap.sh
+ln -sf ~/repos/autoleap/autoleap.sh ~/.local/bin/autoleap.sh
+grep -qxF 'source "$HOME/.local/bin/autoleap.sh"' ~/.bashrc || echo 'source "$HOME/.local/bin/autoleap.sh"' >> ~/.bashrc
+```
+
+If you prefer `~/repositories`, replace `~/repos` with `~/repositories`.
+
+#### Option 2: Download the script directly into `~/.local/bin`
+
+```bash
+mkdir -p ~/.local/bin
+curl -fsSL https://raw.githubusercontent.com/llagerlof/autoleap/master/autoleap.sh -o ~/.local/bin/autoleap.sh
+chmod +x ~/.local/bin/autoleap.sh
+grep -qxF 'source "$HOME/.local/bin/autoleap.sh"' ~/.bashrc || echo 'source "$HOME/.local/bin/autoleap.sh"' >> ~/.bashrc
+```
+
+### Install for everyone
+
+#### Option 3: Clone the repository and symlink the script into `/usr/local/bin`
+
+Clone the repository into a normal user's home directory, then create the system-wide symlink with `sudo`:
+
+```bash
+mkdir -p ~/repos
+git clone https://github.com/llagerlof/autoleap.git ~/repos/autoleap
+chmod +x ~/repos/autoleap/autoleap.sh
+sudo ln -sf ~/repos/autoleap/autoleap.sh /usr/local/bin/autoleap.sh
+grep -qxF 'source /usr/local/bin/autoleap.sh' ~/.bashrc || echo 'source /usr/local/bin/autoleap.sh' >> ~/.bashrc
+```
+
+If you prefer `~/repositories`, replace `~/repos` with `~/repositories`.
+
+#### Option 4: Download the script directly into `/usr/local/bin`
+
+```bash
+sudo curl -fsSL https://raw.githubusercontent.com/llagerlof/autoleap/master/autoleap.sh -o /usr/local/bin/autoleap.sh
+sudo chmod +x /usr/local/bin/autoleap.sh
+grep -qxF 'source /usr/local/bin/autoleap.sh' ~/.bashrc || echo 'source /usr/local/bin/autoleap.sh' >> ~/.bashrc
+```
 
 
 ## Acknowledgment
