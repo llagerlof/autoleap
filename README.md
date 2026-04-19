@@ -69,7 +69,7 @@ grep -qxF 'source /usr/local/bin/autoleap.sh' ~/.bashrc || echo 'source /usr/loc
 
 If you prefer `~/repositories`, replace `~/repos` with `~/repositories`.
 
-This setup works best when other users can read the cloned repository location. If you do not want to grant other users access through one user's home directory, use Option 4 instead.
+Use this option only if you intentionally want all users to depend on a clone managed by one trusted user account. For a safer and simpler multi-user setup, prefer Option 4.
 
 #### Option 4: Download the script directly into `/usr/local/bin`
 
