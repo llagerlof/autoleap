@@ -46,11 +46,9 @@ If you prefer `~/repositories`, replace `~/repos` with `~/repositories`.
 
 #### Option 2: Download the script directly into `~/.local/bin`
 
-The commands below download `autoleap.sh` from the repository's current default branch, `master`.
-
 ```bash
 mkdir -p ~/.local/bin
-curl -fsSL https://raw.githubusercontent.com/llagerlof/autoleap/master/autoleap.sh -o ~/.local/bin/autoleap.sh
+curl -fsSL https://raw.githubusercontent.com/llagerlof/autoleap/HEAD/autoleap.sh -o ~/.local/bin/autoleap.sh
 chmod +x ~/.local/bin/autoleap.sh
 grep -qxF 'source "$HOME/.local/bin/autoleap.sh"' ~/.bashrc || echo 'source "$HOME/.local/bin/autoleap.sh"' >> ~/.bashrc
 ```
@@ -75,10 +73,8 @@ This setup works best when other users can read the cloned repository location. 
 
 #### Option 4: Download the script directly into `/usr/local/bin`
 
-This download also uses the repository's current default branch, `master`.
-
 ```bash
-sudo curl -fsSL https://raw.githubusercontent.com/llagerlof/autoleap/master/autoleap.sh -o /usr/local/bin/autoleap.sh
+sudo curl -fsSL https://raw.githubusercontent.com/llagerlof/autoleap/HEAD/autoleap.sh -o /usr/local/bin/autoleap.sh
 sudo chmod +x /usr/local/bin/autoleap.sh
 grep -qxF 'source /usr/local/bin/autoleap.sh' ~/.bashrc || echo 'source /usr/local/bin/autoleap.sh' >> ~/.bashrc
 ```
